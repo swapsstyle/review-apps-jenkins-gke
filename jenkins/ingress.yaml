@@ -1,0 +1,22 @@
+# Author: Anil Saravade
+# Copyright: Copyright (©) 2020. SwapStyle. All rights reserved.
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: jenkins-ingress
+  namespace: jenkins
+  labels:
+    app: jenkins
+  annotations:
+    networking.gke.io/managed-certificates: jenkins-cert
+    kubernetes.io/ingress.global-static-ip-name: jenkins-ext-ip
+spec:
+  rules:
+  - host: jenkins.[DNS_NAME]
+    http:
+      paths:
+        - path: /*
+          backend:
+            serviceName: jenkins-ui
+            servicePort: 8080

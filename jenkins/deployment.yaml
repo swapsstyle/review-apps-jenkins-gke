@@ -1,0 +1,120 @@
+# Author: Anil Saravade
+# Copyright: Copyright (©) 2020. SwapStyle. All rights reserved.
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: jenkins
+  namespace: jenkins
+  labels:
+    app: jenkins
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: jenkins-master-role
+  namespace: jenkins
+  labels:
+    app: jenkins
+rules:
+- apiGroups: [""]
+  resources: ["pods", "pods/exec", "pods/log", "persistentvolumeclaims"]
+  verbs: ["*"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: jenkins-rolebinding
+  namespace: jenkins
+  labels:
+    app: jenkins
+subjects:
+- kind: ServiceAccount
+  name: jenkins
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: jenkins-master-role
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins
+  namespace: jenkins
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: master
+  template:
+    metadata:
+      labels:
+        app: master
+    spec:
+      containers:
+      - name: master
+        image: jenkins/jenkins:2.67
+        ports:
+        - containerPort: 8080
+        - containerPort: 50000
+        readinessProbe:
+          httpGet:
+            path: /login
+            port: 8080
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 2
+          failureThreshold: 5
+        env:
+        - name: JENKINS_OPTS
+          valueFrom:
+            secretKeyRef:
+              name: jenkins-secret
+              key: options
+        - name: JAVA_OPTS
+          value: '-Xmx1400m'
+        volumeMounts:
+        - mountPath: /var/jenkins_home
+          name: jenkins-home
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1500Mi
+          requests:
+            cpu: 500m
+            memory: 1500Mi
+      volumes:
+      - name: jenkins-home
+        gcePersistentDisk:
+          pdName: jenkins-home
+          fsType: ext4
+          partition: 1
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: jenkins-ui
+  namespace: jenkins
+spec:
+  type: NodePort
+  selector:
+    app: master
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+      name: ui
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: jenkins-discovery
+  namespace: jenkins
+spec:
+  selector:
+    app: master
+  ports:
+    - protocol: TCP
+      port: 50000
+      targetPort: 50000
+      name: slaves

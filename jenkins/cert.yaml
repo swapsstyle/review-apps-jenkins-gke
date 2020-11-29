@@ -1,0 +1,13 @@
+# Author: Anil Saravade
+# Copyright: Copyright (©) 2020. SwapStyle. All rights reserved.
+
+apiVersion: networking.gke.io/v1beta1
+kind: ManagedCertificate
+metadata:
+  name: jenkins-cert
+  namespace: jenkins
+  labels:
+    app: jenkins
+spec:
+  domains:
+    - jenkins.[DNS_NAME]
