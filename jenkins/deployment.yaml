@@ -70,7 +70,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: jenkins-secret
-              key: options
+              key: credentials
         - name: JAVA_OPTS
           value: '-Xmx1400m'
         volumeMounts:
