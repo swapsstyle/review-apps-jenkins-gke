@@ -40,7 +40,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: jenkins
-  namespace: jenkins
+  labels:
+    app: jenkins
 spec:
   replicas: 1
   selector:
@@ -51,44 +52,36 @@ spec:
       labels:
         app: master
     spec:
+      serviceAccountName: jenkins
       containers:
-      - name: master
-        image: jenkins/jenkins
-        ports:
-        - containerPort: 8080
-        - containerPort: 50000
-        readinessProbe:
-          httpGet:
-            path: /login
-            port: 8080
-          periodSeconds: 10
-          timeoutSeconds: 5
-          successThreshold: 2
-          failureThreshold: 5
-        env:
-        - name: JENKINS_OPTS
-          valueFrom:
-            secretKeyRef:
-              name: jenkins-secret
-              key: credentials
-        - name: JAVA_OPTS
-          value: '-Xmx1400m'
-        volumeMounts:
-        - mountPath: /var/jenkins_home
-          name: jenkins-home
-        resources:
-          limits:
-            cpu: 500m
-            memory: 1500Mi
-          requests:
-            cpu: 500m
-            memory: 1500Mi
+        - name: jenkin-master
+          image: swapsstyle/jenkins:v1
+          ports:
+            - name: http-port
+              containerPort: 8080
+            - name: jnlp-port
+              containerPort: 50000
+          securityContext:
+              privileged: true
+          volumeMounts:
+            - name: jenkins-vol
+              mountPath: /var/jenkins_home
+            - name: docker-socket-volume
+              mountPath: /var/run/docker.sock
+      initContainers:  
+        - name: increase-fd-ulimit
+          image: busybox
+          command: ["sh", "-c", "ulimit -n 65536"]
+          securityContext:
+            privileged: true
       volumes:
-      - name: jenkins-home
-        gcePersistentDisk:
-          pdName: jenkins-home
-          fsType: ext4
-          partition: 1
+        - name: jenkins-vol
+          persistentVolumeClaim:
+            claimName: jenkins-pvc
+        - name: docker-socket-volume
+          hostPath:
+            path: /var/run/docker.sock
+            type: File
 ---
 kind: Service
 apiVersion: v1

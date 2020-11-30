@@ -1,0 +1,35 @@
+pipeline {
+    agent any
+    environment {
+        PR_STATUS = sh(script: '''echo ${payload} | jq ".action"''', returnStdout: true).trim()
+        PR_NUMBER = sh(script: '''echo ${payload} | jq ".number"''', returnStdout: true).trim()
+        PR_BRANCH = sh(script: '''echo ${payload} | jq ".pull_request.head.ref"''', returnStdout: true).trim()
+    }
+    stages {
+        stage ('Main Stage') {
+            steps { 
+                script {
+                    if (PR_STATUS.contains("opened") || PR_STATUS.contains("synchronize") || PR_STATUS.contains("reopened")) {
+                        stage('Deploy review application') {
+                            script {
+                                sh "deploying review app: ${PR_STATUS} ${PR_NUMBER} ${PR_BRANCH}"
+                            }
+                        }
+                    }
+                    if (PR_STATUS.contains("closed")) {
+                        stage("Delete review application") {
+                            script {
+                                sh "deleting review app ${PR_STATUS} ${PR_NUMBER} ${PR_BRANCH}"
+                            }
+                        }
+                    }   
+                }
+            }
+        }      
+    }
+    post {
+        always {
+            deleteDir() /* clean up our workspace */
+        }
+    }    
+}
