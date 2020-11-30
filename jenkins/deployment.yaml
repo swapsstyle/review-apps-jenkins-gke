@@ -53,7 +53,7 @@ spec:
     spec:
       containers:
       - name: master
-        image: jenkins/jenkins:2.67
+        image: jenkins/jenkins
         ports:
         - containerPort: 8080
         - containerPort: 50000
