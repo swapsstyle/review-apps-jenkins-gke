@@ -12,14 +12,14 @@ pipeline {
                     if (PR_STATUS.contains("opened") || PR_STATUS.contains("synchronize") || PR_STATUS.contains("reopened")) {
                         stage('Deploy review application') {
                             script {
-                                sh "deploying review app: ${PR_STATUS} ${PR_NUMBER} ${PR_BRANCH}"
+                                sh '''echo "deploying review app: ${PR_STATUS} ${PR_NUMBER} ${PR_BRANCH}"'''
                             }
                         }
                     }
                     if (PR_STATUS.contains("closed")) {
                         stage("Delete review application") {
                             script {
-                                sh "deleting review app ${PR_STATUS} ${PR_NUMBER} ${PR_BRANCH}"
+                                sh ''' echo "deleting review app ${PR_STATUS} ${PR_NUMBER} ${PR_BRANCH}"'''
                             }
                         }
                     }   
