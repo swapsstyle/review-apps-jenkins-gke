@@ -4,22 +4,42 @@ pipeline {
         PR_STATUS = sh(script: '''echo ${payload} | jq ".action"''', returnStdout: true).trim()
         PR_NUMBER = sh(script: '''echo ${payload} | jq ".number"''', returnStdout: true).trim()
         PR_BRANCH = sh(script: '''echo ${payload} | jq ".pull_request.head.ref"''', returnStdout: true).trim()
+        PROJECT_ID= "searce-playground"
+        APP_NAME= "review-app"
     }
     stages {
         stage ('Main Stage') {
             steps { 
                 script {
-                    if (PR_STATUS.contains("opened") || PR_STATUS.contains("synchronize") || PR_STATUS.contains("reopened")) {
-                        stage('Deploy review application') {
+                    if (PR_STATUS.contains("opened") || PR_STATUS.contains("reopened") || PR_STATUS.contains("synchronize") ) {
+                        stage("Checkout code") {
                             script {
-                                sh '''echo "deploying review app: ${PR_STATUS} ${PR_NUMBER} ${PR_BRANCH}"'''
+                                sh 'git checkout -b ${PR_BRANCH}'
                             }
                         }
+                        stage("Build image") {
+                            script {
+                                app = docker.build("${PROJECT_ID}/${APP_NAME}")
+                            }
+                        }
+                        stage("Push image") {
+                            script {
+                                docker.withRegistry('https://gcr.io', '${PROJECT_ID}') {
+                                app.push("${GIT_COMMIT}")
+                                }  
+                            }
+                        }
+                        stage('Deploy review application') {
+                            script {
+                                sh "echo 'deploy review'"
+                                }
+                            }
                     }
                     if (PR_STATUS.contains("closed")) {
-                        stage("Delete review application") {
+                        stage('Destroy review application') {
                             script {
-                                sh ''' echo "deleting review app ${PR_STATUS} ${PR_NUMBER} ${PR_BRANCH}"'''
+                                sh "echo 'delete review'"
+                                }
                             }
                         }
                     }   
