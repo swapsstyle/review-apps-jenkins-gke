@@ -6,7 +6,7 @@ FROM jenkins/jenkins
 MAINTAINER swapsstyle
 USER root
 
-RUN apt-get update && apt-get -y install rsync git subversion wget zip unzip jq nano vim
+RUN apt-get update && apt-get -y install rsync git subversion wget zip unzip jq nano vim gettext-base
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Install Docker
