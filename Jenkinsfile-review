@@ -18,15 +18,12 @@ pipeline {
                             }
                         }
                         stage("Build image") {
-                            script {
-                                app = docker.build("gcr.io/${PROJECT_ID}/${APP_NAME}")
-                            }
+                            app = docker.build("gcr.io/${PROJECT_ID}/${APP_NAME}")
                         }
                         stage("Push image") {
-                            script {
-                                docker.withRegistry('https://gcr.io', 'gcr:searce-playground') {
-                                app.push("${GIT_COMMIT}")
-                                }  
+                            withDockerRegistry([ credentialsId: "${PROJECT_ID}", url: "https://gcr.io" ]) {
+                            app.push("${GIT_COMMIT}")
+                            app.push("latest")
                             }
                         }
                         stage('Deploy review application') {
