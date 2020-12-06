@@ -21,9 +21,8 @@ pipeline {
                             app = docker.build("gcr.io/${PROJECT_ID}/${APP_NAME}")
                         }
                         stage("Push image") {
-                            withDockerRegistry([ credentialsId: "${PROJECT_ID}", url: "https://gcr.io" ]) {
+                            withDockerRegistry([ credentialsId: "gcr:${PROJECT_ID}", url: "https://gcr.io" ]) {
                             app.push("${GIT_COMMIT}")
-                            app.push("latest")
                             }
                         }
                         stage('Deploy review application') {
