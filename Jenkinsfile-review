@@ -19,7 +19,7 @@ pipeline {
                         }
                         stage("Build image") {
                             script {
-                                app = docker.build("${PROJECT_ID}/${APP_NAME}")
+                                app = docker.build("gcr.io/${PROJECT_ID}/${APP_NAME}")
                             }
                         }
                         stage("Push image") {
