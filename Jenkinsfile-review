@@ -24,7 +24,7 @@ pipeline {
                         }
                         stage("Push image") {
                             script {
-                                docker.withRegistry('https://gcr.io', 'gcr:searce-playground') {
+                                docker.withRegistry('https://gcr.io', '${env.PROJECT_ID}') {
                                 app.push("${GIT_COMMIT}")
                                 }  
                             }
