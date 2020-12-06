@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ${APP_NAME}-${PR_NUMBER}-ns
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: ${APP_NAME}-${PR_NUMBER}-svc
+  namespace: ${APP_NAME}-${PR_NUMBER}-ns
+spec:
+  selector:
+    app: ${APP_NAME}-${PR_NUMBER}-deployment
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ${APP_NAME}-${PR_NUMBER}-deployment
+  namespace: ${APP_NAME}-${PR_NUMBER}-ns
+  labels:
+    app: ${APP_NAME}-${PR_NUMBER}-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ${APP_NAME}-${PR_NUMBER}-deployment
+  template:
+    metadata:
+      labels:
+        app: ${APP_NAME}-${PR_NUMBER}-deployment
+    spec:
+      containers:
+      - name: ${APP_NAME}-${PR_NUMBER}-deployment
+        image: gcr.io/${PROJECT_ID}/${APP_NAME}-img:${GIT_COMMIT}
+        ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ${APP_NAME}-${PR_NUMBER}-ingress
+  namespace: ${APP_NAME}-${PR_NUMBER}-ns
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /review-${PR_NUMBER}
+        backend:
+          serviceName: ${APP_NAME}-${PR_NUMBER}-svc
+          servicePort: 80

@@ -5,7 +5,7 @@ pipeline {
         PR_NUMBER = sh(script: '''echo ${payload} | jq ".number"''', returnStdout: true).trim()
         PR_BRANCH = sh(script: '''echo ${payload} | jq ".pull_request.head.ref"''', returnStdout: true).trim()
         PROJECT_ID= "searce-playground"
-        APP_NAME= "review-app"
+        APP_NAME= "anilgs-review-app"
     }
     stages {
         stage ('Main Stage') {
@@ -18,24 +18,53 @@ pipeline {
                             }
                         }
                         stage("Build image") {
-                            app = docker.build("gcr.io/${PROJECT_ID}/${APP_NAME}")
+                            script {
+                                sh '''
+                                cd sample-app/
+                                docker build . -t gcr.io/${PROJECT_ID}/${APP_NAME}:${GIT_COMMIT}
+                                '''
+                            }
                         }
                         stage("Push image") {
                             withDockerRegistry([ credentialsId: "gcr:${PROJECT_ID}", url: "https://gcr.io" ]) {
                             app.push("${GIT_COMMIT}")
                             }
                         }
-                        stage('Deploy review application') {
+                        stage('Generate Manifest') {
                             script {
-                                sh "echo 'deploy review'"
+                                sh """
+                                envsubst < sample-app/yamls/review.yaml > ${HOME}/patched-config.yaml
+                                """
+                            }
+                        }
+                        stage('Configure GKE cluster') {
+                            script {
+                                withCredentials([file(credentialsId: 'review-gke', variable: 'KUBECONFIG_CONTENT')]) {
+                                    sh '''echo "$KUBECONFIG_CONTENT" > kubeconfig && cat kubeconfig && rm kubeconfig'''
                                 }
                             }
+                        }
+                        stage('Deploy review application') {
+                            script {
+                                sh '''
+                                kubectl apply -f ${HOME}/patched-config.yaml
+                                kubectl rollout status deployment/${APP_NAME}-${PR_NUMBER}-deployment -n ${APP_NAME}-${PR_NUMBER}-ns
+                                '''
+                            }
+                        }
+
                     }
                     if (PR_STATUS.contains("closed")) {
-                        stage('Destroy review application') {
+                        stage('Configure GKE cluster') {
                             script {
-                                sh "echo 'delete review'"
+                                withCredentials([file(credentialsId: 'review-gke', variable: 'KUBECONFIG_CONTENT')]) {
+                                    sh '''echo "$KUBECONFIG_CONTENT" > kubeconfig && cat kubeconfig && rm kubeconfig'''
                                 }
+                            }
+                        }
+                        stage("Delete review application") {
+                            script {
+                                sh "kubectl delete namespace ${APP_NAME}-${PR_NUMBER}-ns"
                             }
                         }
                     }   
