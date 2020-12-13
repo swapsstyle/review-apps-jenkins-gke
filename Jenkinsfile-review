@@ -43,12 +43,12 @@ pipeline {
                             script {
                                 withCredentials([file(credentialsId: 'jenkins-kubeconfig', variable: 'KUBECONFIG_CONTENT')]) {
                                     sh '''
-                                        if [ ! -f "kubeconfig" ]
+                                        if [ ! -f "~/.kube/kubeconfig" ]
                                         then
-                                            echo "$KUBECONFIG_CONTENT" > kubeconfig
+                                            echo "$KUBECONFIG_CONTENT" > ~/.kube/kubeconfig
                                         else
                                             rm kubeconfig
-                                            echo "$KUBECONFIG_CONTENT" > kubeconfig
+                                            echo "$KUBECONFIG_CONTENT" > ~/.kube/kubeconfig
                                         fi
                                     '''
                                 }
@@ -71,10 +71,10 @@ pipeline {
                                     sh '''
                                         if [ ! -f "kubeconfig" ]
                                         then
-                                            echo "$KUBECONFIG_CONTENT" > kubeconfig
+                                            echo "$KUBECONFIG_CONTENT" > ~/.kube/kubeconfig
                                         else
                                             rm kubeconfig
-                                            echo "$KUBECONFIG_CONTENT" > kubeconfig
+                                            echo "$KUBECONFIG_CONTENT" > ~/.kube/kubeconfig
                                         fi
                                     '''
                                 }
