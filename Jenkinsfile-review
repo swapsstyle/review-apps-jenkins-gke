@@ -27,7 +27,7 @@ pipeline {
                         }
                         stage("Push image") {
                             script {
-                                withDockerRegistry(credentialsId: "gcr:${PROJECT_ID}", url: "https://gcr.io") {
+                                withDockerRegistry([credentialsId: "gcr:${PROJECT_ID}", url: "https://gcr.io"]) {
                                 sh "docker push gcr.io/${PROJECT_ID}/${APP_NAME}:${GIT_COMMIT}"
                                 }
                             }
