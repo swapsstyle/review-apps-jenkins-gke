@@ -26,10 +26,10 @@ pipeline {
                             }
                         }
                         stage("Push image") {
-                            script {
+                            #script {
                                 docker.withRegistry('https://gcr.io', 'gcr:${PROJECT_ID}') {
                                 sh "docker push gcr.io/${PROJECT_ID}/${APP_NAME}:${GIT_COMMIT}"
-                                }
+                             #   }
                             }
                         }
                         stage('Generate Manifest') {
