@@ -60,7 +60,10 @@ pipeline {
                         stage('Configure GKE cluster') {
                             script {
                                 withCredentials([file(credentialsId: 'jenkins-kubeconfig', variable: 'KUBECONFIG_CONTENT')]) {
-                                    sh '''echo "$KUBECONFIG_CONTENT" > kubeconfig && cat kubeconfig && rm kubeconfig'''
+                                    sh '''
+                                    rm kubeconfig
+                                    echo "$KUBECONFIG_CONTENT" > kubeconfig
+                                    '''
                                 }
                             }
                         }
