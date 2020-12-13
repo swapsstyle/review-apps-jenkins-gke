@@ -41,16 +41,8 @@ pipeline {
                         }
                         stage('Configure GKE cluster') {
                             script {
-                                withCredentials([kubeconfigContent(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_CONTENT')]) {
-                                    sh '''
-                                        if [ ! -f "~/.kube/kubeconfig" ]
-                                        then
-                                            echo "$KUBECONFIG_CONTENT" > ~/.kube/kubeconfig
-                                        else
-                                            rm kubeconfig
-                                            echo "$KUBECONFIG_CONTENT" > ~/.kube/kubeconfig
-                                        fi
-                                    '''
+                                withCredentials([file(credentialsId: 'jenkins-kubeconfig', variable: 'KUBECONFIG_CONTENT')]) {
+                                    sh '''echo "$KUBECONFIG_CONTENT" > kubeconfig && cat kubeconfig && rm kubeconfig'''
                                 }
                             }
                         }
@@ -67,16 +59,8 @@ pipeline {
                     if (PR_STATUS.contains("closed")) {
                         stage('Configure GKE cluster') {
                             script {
-                                withCredentials([kubeconfigContent(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_CONTENT')]) {
-                                    sh '''
-                                        if [ ! -f "kubeconfig" ]
-                                        then
-                                            echo "$KUBECONFIG_CONTENT" > ~/.kube/kubeconfig
-                                        else
-                                            rm kubeconfig
-                                            echo "$KUBECONFIG_CONTENT" > ~/.kube/kubeconfig
-                                        fi
-                                    '''
+                                withCredentials([file(credentialsId: 'jenkins-kubeconfig', variable: 'KUBECONFIG_CONTENT')]) {
+                                    sh '''echo "$KUBECONFIG_CONTENT" > kubeconfig && cat kubeconfig && rm kubeconfig'''
                                 }
                             }
                         }
