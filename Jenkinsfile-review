@@ -27,7 +27,7 @@ pipeline {
                         }
                         stage("Push image") {
                             script {
-                                withDockerRegistry([ credentialsId: "gcr:${PROJECT_ID}", url: "https://gcr.io" ]) {
+                                withDockerRegistry([credentialsId: "gcr:${PROJECT_ID}", url: "https://gcr.io"]) {
                                 sh "docker push gcr.io/${PROJECT_ID}/${APP_NAME}:${GIT_COMMIT}"
                                 }
                             }
@@ -41,7 +41,7 @@ pipeline {
                         }
                         stage('Configure GKE cluster') {
                             script {
-                                withCredentials([file(credentialsId: 'review-gke', variable: 'KUBECONFIG_CONTENT')]) {
+                                withCredentials([file(credentialsId: 'jenkins-kubeconfig', variable: 'KUBECONFIG_CONTENT')]) {
                                     sh '''echo "$KUBECONFIG_CONTENT" > kubeconfig && cat kubeconfig && rm kubeconfig'''
                                 }
                             }
@@ -59,7 +59,7 @@ pipeline {
                     if (PR_STATUS.contains("closed")) {
                         stage('Configure GKE cluster') {
                             script {
-                                withCredentials([file(credentialsId: 'review-gke', variable: 'KUBECONFIG_CONTENT')]) {
+                                withCredentials([file(credentialsId: 'jenkins-kubeconfig', variable: 'KUBECONFIG_CONTENT')]) {
                                     sh '''echo "$KUBECONFIG_CONTENT" > kubeconfig && cat kubeconfig && rm kubeconfig'''
                                 }
                             }
