@@ -46,11 +46,9 @@ pipeline {
                                         if [ ! -f "kubeconfig" ]
                                         then
                                             echo "$KUBECONFIG_CONTENT" > kubeconfig
-                                        EOF
                                         else
                                             rm kubeconfig
                                             echo "$KUBECONFIG_CONTENT" > kubeconfig
-                                        EOF
                                         fi
                                     '''
                                 }
@@ -74,11 +72,9 @@ pipeline {
                                         if [ ! -f "kubeconfig" ]
                                         then
                                             echo "$KUBECONFIG_CONTENT" > kubeconfig
-                                        EOF
                                         else
                                             rm kubeconfig
                                             echo "$KUBECONFIG_CONTENT" > kubeconfig
-                                        EOF
                                         fi
                                     '''
                                 }
