@@ -41,7 +41,7 @@ pipeline {
                         }
                         stage('Configure GKE cluster') {
                             script {
-                                withCredentials([file(credentialsId: 'jenkins-kubeconfig', variable: 'KUBECONFIG_CONTENT')]) {
+                                withCredentials([kubeconfigContent(credentialsId: 'jenkins-kubeconfig', variable: 'KUBECONFIG_CONTENT')]) {
                                     sh '''
                                         if [ ! -f "~/.kube/kubeconfig" ]
                                         then
@@ -67,7 +67,7 @@ pipeline {
                     if (PR_STATUS.contains("closed")) {
                         stage('Configure GKE cluster') {
                             script {
-                                withCredentials([file(credentialsId: 'jenkins-kubeconfig', variable: 'KUBECONFIG_CONTENT')]) {
+                                withCredentials([kubeconfigContent(credentialsId: 'jenkins-kubeconfig', variable: 'KUBECONFIG_CONTENT')]) {
                                     sh '''
                                         if [ ! -f "kubeconfig" ]
                                         then
