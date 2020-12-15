@@ -36,7 +36,7 @@ spec:
     spec:
       containers:
       - name: ${APP_NAME}-${PR_NUMBER}-deployment
-        image: gcr.io/${PROJECT_ID}/${APP_NAME}-img:${GIT_COMMIT}
+        image: gcr.io/${PROJECT_ID}/${APP_NAME}:${GIT_COMMIT}
         ports:
         - name: http
           containerPort: 80
