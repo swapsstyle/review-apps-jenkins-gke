@@ -6,7 +6,7 @@ pipeline {
         PR_BRANCH = sh(script: '''echo ${payload} | jq ".pull_request.head.ref"''', returnStdout: true).trim()
         GCP_PROJECT_ID= "searce-playground"
         APP_NAME= "anilgs-review-app"
-        GCP_ZONE = "us-central1-c"
+        GCP_ZONE = "us-central1-a"
         GKE_CLUSTER_NAME = "testing-cluster-poc"
     }
     stages {
