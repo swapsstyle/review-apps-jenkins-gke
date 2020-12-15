@@ -48,7 +48,7 @@ pipeline {
                             }
                         }
                     }
-                    stage('Deploy review application') {
+                    stage('Deploy stage application') {
                         script {
                             sh '''
                             kubectl apply -f ${HOME}/patched-config.yaml
