@@ -43,7 +43,7 @@ pipeline {
                         }
                         stage('Authenticate GKE cluster') {
                             script {
-                                withCredentials([file(credentialsId: '${PROJECT_ID}', variable: 'GCP_SERVICE_ACCOUNT')]) {
+                                withCredentials([file(credentialsId: 'gcp-service-account', variable: 'GCP_SERVICE_ACCOUNT')]) {
                                     sh '''
                                     gcloud auth activate-service-account --key-file=${GCP_SERVICE_ACCOUNT}
                                     gcloud container clusters get-credentials ${CLUSTER_NAME} --zone ${REGION}-c --project ${PROJECT_ID}
