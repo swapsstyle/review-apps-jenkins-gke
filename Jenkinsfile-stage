@@ -1,0 +1,68 @@
+pipeline {
+    agent any
+    environment {
+        GCP_PROJECT_ID= "searce-playground"
+        APP_NAME= "anilgs-stage-app"
+        GCP_ZONE = "us-central1-c"
+        GKE_CLUSTER_NAME = "test-anilgs-gke"
+    }
+    stages {
+        stage ('Main Stage') {
+            steps { 
+                script {
+                    stage("Checkout code") {
+                        script {
+                            sh 'git checkout'
+                        }
+                    }
+                    stage("Build image") {
+                        script {
+                            sh '''
+                            cd sample-app/
+                            docker build . -t gcr.io/${GCP_PROJECT_ID}/${APP_NAME}:${GIT_COMMIT}
+                            '''
+                        }
+                    }
+                    stage("Push image") {
+                        script {
+                            withDockerRegistry([credentialsId: "gcr:${GCP_PROJECT_ID}", url: "https://gcr.io"]) {
+                            sh "docker push gcr.io/${GCP_PROJECT_ID}/${APP_NAME}:${GIT_COMMIT}"
+                            }
+                        }
+                    }
+                    stage('Generate Manifest') {
+                        script {
+                            sh """
+                            envsubst < sample-app/yamls/stage.yaml > ${HOME}/patched-config.yaml
+                            """
+                        }
+                    }
+                    stage('Authenticate GKE cluster') {
+                        script {
+                            withCredentials([file(credentialsId: 'gcp-service-account', variable: 'GCP_SERVICE_ACCOUNT')]) {
+                                sh '''
+                                gcloud auth activate-service-account --key-file=${GCP_SERVICE_ACCOUNT}
+                                gcloud container clusters get-credentials ${GKE_CLUSTER_NAME} --zone ${GCP_ZONE} --project ${GCP_PROJECT_ID}
+                                kubectl apply -f ${HOME}/patched-config.yaml
+                                '''
+                            }
+                        }
+                    }
+                    stage('Deploy review application') {
+                        script {
+                            sh '''
+                            kubectl apply -f ${HOME}/patched-config.yaml
+                            kubectl rollout status deployment/${APP_NAME}-deployment -n ${APP_NAME}-ns
+                            '''
+                        }
+                    }
+                }
+            }
+        }
+    }
+    post {
+        always {
+            deleteDir() /* clean up our workspace */
+        }
+    }    
+}

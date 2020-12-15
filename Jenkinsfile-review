@@ -7,7 +7,7 @@ pipeline {
         GCP_PROJECT_ID= "searce-playground"
         APP_NAME= "anilgs-review-app"
         GCP_ZONE = "us-central1-c"
-        GKE_CLUSTER_NAME = "testing-cluster-poc"
+        GKE_CLUSTER_NAME = "test-anilgs-gke"
     }
     stages {
         stage ('Main Stage') {
