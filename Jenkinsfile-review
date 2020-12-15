@@ -6,6 +6,8 @@ pipeline {
         PR_BRANCH = sh(script: '''echo ${payload} | jq ".pull_request.head.ref"''', returnStdout: true).trim()
         PROJECT_ID= "searce-playground"
         APP_NAME= "anilgs-review-app"
+        REGION = "us-central1"
+        CLUSTER_NAME = "test-anilgs-gke"
     }
     stages {
         stage ('Main Stage') {
@@ -39,10 +41,14 @@ pipeline {
                                 """
                             }
                         }
-                        stage('Configure GKE cluster') {
+                        stage('Authenticate GKE cluster') {
                             script {
-                                withCredentials([file(credentialsId: 'jenkins-kubeconfig', variable: 'KUBECONFIG_CONTENT')]) {
-                                    sh '''echo "$KUBECONFIG_CONTENT" > kubeconfig && cat kubeconfig && rm kubeconfig'''
+                                withCredentials([file(credentialsId: '${PROJECT_ID}', variable: 'GCP_SERVICE_ACCOUNT')]) {
+                                    sh '''
+                                    gcloud auth activate-service-account --key-file=${GCP_SERVICE_ACCOUNT}
+                                    gcloud container clusters get-credentials ${CLUSTER_NAME} --zone ${REGION}-c --project ${PROJECT_ID}
+                                    kubectl apply -f ${HOME}/patched-config.yaml
+                                    '''
                                 }
                             }
                         }
