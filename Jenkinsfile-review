@@ -4,10 +4,10 @@ pipeline {
         PR_STATUS = sh(script: '''echo ${payload} | jq ".action"''', returnStdout: true).trim()
         PR_NUMBER = sh(script: '''echo ${payload} | jq ".number"''', returnStdout: true).trim()
         PR_BRANCH = sh(script: '''echo ${payload} | jq ".pull_request.head.ref"''', returnStdout: true).trim()
-        GCP_PROJECT_ID= "searce-playground"
-        APP_NAME= "anilgs-review-app"
+        GCP_PROJECT_ID= "example.com"
+        APP_NAME= "review-app"
         GCP_ZONE = "us-central1-c"
-        GKE_CLUSTER_NAME = "test-anilgs-gke"
+        GKE_CLUSTER_NAME = "application-cluster"
     }
     stages {
         stage ('Main Stage') {
