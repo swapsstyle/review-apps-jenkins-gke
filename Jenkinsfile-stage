@@ -1,10 +1,10 @@
 pipeline {
     agent any
     environment {
-        GCP_PROJECT_ID= "searce-playground"
-        APP_NAME= "anilgs-stage-app"
+        GCP_PROJECT_ID= "example.com"
+        APP_NAME= "stage-app"
         GCP_ZONE = "us-central1-c"
-        GKE_CLUSTER_NAME = "test-anilgs-gke"
+        GKE_CLUSTER_NAME = "application-cluster"
     }
     stages {
         stage ('Main Stage') {
